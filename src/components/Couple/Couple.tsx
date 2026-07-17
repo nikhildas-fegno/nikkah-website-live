@@ -42,9 +42,9 @@ export function Couple() {
           <CoupleNames />
         </Reveal>
 
-        <Reveal direction="up" delay={0.12} className="mt-14 md:mt-16">
+        {/* <Reveal direction="up" delay={0.12} className="mt-14 md:mt-16">
           <CoupleSlider />
-        </Reveal>
+        </Reveal> */}
       </div>
     </section>
   )
