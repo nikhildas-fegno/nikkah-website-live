@@ -1,7 +1,7 @@
 import { LatticePattern } from '../ui/Ornaments'
 import { SectionHeading } from '../ui/SectionHeading'
 import { Reveal } from '../ui/Reveal'
-import { CoupleNames, CoupleSlider } from './CoupleSlider'
+import { CoupleNames } from './CoupleSlider'
 
 /**
  * The Couple — one showcase, not two halves.
