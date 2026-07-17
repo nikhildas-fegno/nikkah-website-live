@@ -339,6 +339,48 @@
   }
 }
 
+/* Scroll cue: the thread falls, the chevron follows it down. Offset timings so
+   it reads as one continuous gesture rather than two things bobbing. */
+.pl-thread {
+  transform-origin: top;
+  animation: pl-thread 2.4s ease-in-out infinite;
+}
+@keyframes pl-thread {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.pl-cue {
+  animation: pl-cue 2.4s ease-in-out infinite;
+}
+@keyframes pl-cue {
+  0%,
+  100% {
+    transform: translateY(-6px);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pl-thread,
+  .pl-cue {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Doors part on .is-opening */
 .pl-door {
   transition: transform 1.25s cubic-bezier(0.65, 0, 0.35, 1) 0.15s;

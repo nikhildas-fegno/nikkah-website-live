@@ -134,14 +134,27 @@ export function Events() {
                       </div>
                     )}
 
-                    <div className="grid grid-cols-[auto_1fr] items-start gap-x-3.5">
-                      <dt className="mt-0.5">
-                        <MapPin className="h-4 w-4 text-gold" strokeWidth={1.25} aria-hidden="true" />
+                    {/*
+                      The venue is promoted out of the plain rows above: it's
+                      the one detail a guest has to act on — the date they'll
+                      remember, the address they must navigate to. Tinted
+                      panel, gold rule, and the name in display emerald so it
+                      carries at a glance.
+                    */}
+                    <div className="grid grid-cols-[auto_1fr] items-start gap-x-3.5 rounded-[1px] border border-gold/30 bg-gold/[0.06] px-4 py-3.5">
+                      <dt className="mt-1">
+                        <MapPin
+                          className="h-4 w-4 text-gold-deep"
+                          strokeWidth={1.5}
+                          aria-hidden="true"
+                        />
                         <span className="sr-only">Venue</span>
                       </dt>
-                      <dd className="text-[0.8rem] font-light text-ink">
-                        {event.venue}
-                        <span className="block text-[0.7rem] leading-relaxed text-muted">
+                      <dd>
+                        <span className="display block text-[1.2rem] leading-snug text-emerald md:text-[1.35rem]">
+                          {event.venue}
+                        </span>
+                        <span className="mt-1 block text-[0.72rem] leading-relaxed font-light text-muted">
                           {event.address}
                         </span>
                       </dd>
@@ -157,16 +170,19 @@ export function Events() {
                     {/* No date, no calendar link — it would create an event at
                         an arbitrary time in the guest's calendar. */}
 
+                    {/* Gold, not glass — this is the action the highlighted
+                        venue above is pointing at, so it shouldn't read as a
+                        secondary control. */}
                     <ButtonLink
                       href={event.mapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      variant="glass"
+                      variant="gold"
                       size="sm"
                       icon={<MapPin className="h-3.5 w-3.5" strokeWidth={1.25} />}
                       iconPosition="left"
                     >
-                      Location
+                      Get Directions
                     </ButtonLink>
                   </div>
                 </div>

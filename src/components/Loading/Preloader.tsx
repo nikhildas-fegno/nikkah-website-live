@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { bride, groom, wedding } from '../../data/wedding'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 import { starPoints } from '../ui/Ornaments'
@@ -84,14 +85,58 @@ function DrawnSeal() {
 export function Preloader({ onOpenStart, onOpen }: PreloaderProps) {
   const prefersReduced = useReducedMotion()
   const [opening, setOpening] = useState(false)
+  const openedRef = useRef(false)
 
-  const handleOpen = () => {
-    if (opening) return
-    setOpening(true)
+  const handleOpen = useCallback(() => {
+    if (openedRef.current) return
+    openedRef.current = true // ref, not state: the listeners below close over
+    setOpening(true) //          the first render and would re-fire otherwise
     onOpenStart() // reveal the Hero before the doors expose it
     // Hand off just before the panels finish, so Hero is already fading up
     window.setTimeout(onOpen, prefersReduced ? 0 : 1150)
-  }
+  }, [onOpen, onOpenStart, prefersReduced])
+
+  /**
+   * Scroll to open.
+   *
+   * The page is deliberately locked while this screen is up, so no `scroll`
+   * event will ever fire — `wheel` and `touchmove` still do, and they're what a
+   * guest actually performs when they try to scroll. Keys are included because
+   * a keyboard user's "scroll" is Space or ArrowDown.
+   *
+   * The cue below is still a real <button>, so this isn't the only way in:
+   * clicking or pressing Enter on it works too, which keeps the invitation
+   * openable by anyone who can't produce a scroll gesture at all.
+   */
+  useEffect(() => {
+    if (prefersReduced) return
+
+    const onWheel = (e: WheelEvent) => {
+      if (e.deltaY > 0) handleOpen() // downward only — an upward flick isn't intent
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (['ArrowDown', 'PageDown', ' ', 'Spacebar', 'Enter'].includes(e.key)) handleOpen()
+    }
+    let touchStart = 0
+    const onTouchStart = (e: TouchEvent) => {
+      touchStart = e.touches[0]?.clientY ?? 0
+    }
+    const onTouchMove = (e: TouchEvent) => {
+      // A deliberate upward drag of the thumb = scrolling down the page
+      if (touchStart - (e.touches[0]?.clientY ?? 0) > 24) handleOpen()
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: true })
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchmove', onTouchMove, { passive: true })
+    return () => {
+      window.removeEventListener('wheel', onWheel)
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchmove', onTouchMove)
+    }
+  }, [handleOpen, prefersReduced])
 
   const d = (delay: number) => ({ '--d': `${prefersReduced ? 0 : delay}s` }) as React.CSSProperties
 
@@ -185,20 +230,34 @@ export function Preloader({ onOpenStart, onOpen }: PreloaderProps) {
           You are cordially invited
         </p>
 
-        {/* Open button — the gesture that also unlocks audio */}
+        {/*
+          The cue is a real <button>, not a decorative hint. Scrolling is the
+          intended gesture, but a keyboard or screen-reader user may have no way
+          to produce one — this keeps the invitation openable by Tab + Enter,
+          and by a plain click for anyone who reaches for it.
+        */}
         <button
           type="button"
           onClick={handleOpen}
           style={d(1)}
-          className="pl-rise group relative overflow-hidden rounded-[1px] border border-gold/70 bg-transparent px-12 py-5 font-body text-[0.7rem] font-light tracking-[0.34em] text-gold uppercase transition-colors duration-500 hover:-translate-y-0.5 hover:text-emerald-deep focus-visible:outline-gold"
+          className="pl-rise group flex flex-col items-center gap-4 bg-transparent focus-visible:outline-gold"
         >
-          {/* Gold fills from the bottom on hover */}
-          <span className="absolute inset-0 origin-bottom scale-y-0 bg-gold transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-y-100" />
-          <span className="relative">Open Invitation</span>
+          <span className="font-body text-[0.62rem] font-light tracking-[0.34em] text-gold/90 uppercase transition-colors duration-500 group-hover:text-gold">
+            Scroll to open
+          </span>
+
+          {/* A gold thread falling into a chevron — the page's own language for
+              "there is more below". */}
+          <span className="relative flex h-14 w-4 items-center justify-center" aria-hidden="true">
+            <span className="pl-thread absolute top-0 h-8 w-px bg-gradient-to-b from-transparent via-gold/70 to-gold" />
+            <span className="pl-cue absolute bottom-0 text-gold">
+              <ChevronDown className="h-4 w-4" strokeWidth={1} />
+            </span>
+          </span>
         </button>
 
         <p
-          className="pl-rise mt-6 text-[0.55rem] font-light tracking-[0.3em] text-ivory/35 uppercase"
+          className="pl-rise mt-4 text-[0.55rem] font-light tracking-[0.3em] text-ivory/35 uppercase"
           style={d(1.35)}
         >
           {wedding.dateLabel}
