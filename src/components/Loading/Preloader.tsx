@@ -1,0 +1,209 @@
+import { useState } from 'react'
+import { bride, groom, wedding } from '../../data/wedding'
+import { useReducedMotion } from '../../hooks/useReducedMotion'
+import { starPoints } from '../ui/Ornaments'
+
+interface PreloaderProps {
+  /** Fires the instant the button is pressed — the doors are about to part, so
+      whatever is underneath needs to be visible *now*. */
+  onOpenStart: () => void
+  /** Fires once the doors have finished parting and this screen can retire. */
+  onOpen: () => void
+}
+
+/**
+ * The seal, drawn stroke by stroke — in CSS.
+ *
+ * `pathLength="1"` normalises every shape to a unit length so a single
+ * dasharray rule animates circles, rects and polygons identically. Each element
+ * carries its own `--d` delay, following the order a hand would actually
+ * construct an 8-fold rosette: rings, then the two generating squares, then the
+ * rosette inside them.
+ */
+function DrawnSeal() {
+  const el = (delay: number, opacity = 1) =>
+    ({ '--d': `${delay}s`, '--o': opacity }) as React.CSSProperties
+
+  return (
+    <svg viewBox="0 0 200 200" fill="none" className="seal-draw h-full w-full">
+      <g
+        stroke="currentColor"
+        strokeWidth="0.9"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        fill="none"
+      >
+        <circle data-draw cx="100" cy="100" r="92" pathLength="1" style={el(0, 0.3)} />
+        <circle data-draw cx="100" cy="100" r="84" pathLength="1" style={el(0.15, 0.5)} />
+
+        {/* The generating squares */}
+        <rect data-draw x="42" y="42" width="116" height="116" pathLength="1" style={el(0.5)} />
+        <rect
+          data-draw
+          x="42"
+          y="42"
+          width="116"
+          height="116"
+          transform="rotate(45 100 100)"
+          pathLength="1"
+          style={el(0.75)}
+        />
+
+        {/* Rosette */}
+        <polygon
+          data-draw
+          points={starPoints(100, 100, 60, 24.8, 8)}
+          pathLength="1"
+          style={el(1.05, 0.75)}
+        />
+        <polygon
+          data-draw
+          points={starPoints(100, 100, 30, 12.4, 8)}
+          pathLength="1"
+          style={el(1.3, 0.5)}
+        />
+        <circle data-draw cx="100" cy="100" r="14" pathLength="1" style={el(1.5, 0.4)} />
+      </g>
+    </svg>
+  )
+}
+
+/**
+ * The invitation opening experience.
+ *
+ * Deliberately built without Framer Motion. This is the first paint, and
+ * pulling Motion into the entry chunk cost ~3.2s of scripting on a throttled
+ * mobile CPU — the seal couldn't appear until an animation library had parsed,
+ * which is exactly backwards. Plain CSS runs it, and the rest of the site
+ * streams in behind this screen while the guest reads the Bismillah.
+ *
+ * Sequence: the seal draws while the Bismillah and monogram rise → the button
+ * arrives. On "Open Invitation" the seal blooms outward and two emerald panels
+ * part like doors, revealing the Hero beneath.
+ */
+export function Preloader({ onOpenStart, onOpen }: PreloaderProps) {
+  const prefersReduced = useReducedMotion()
+  const [opening, setOpening] = useState(false)
+
+  const handleOpen = () => {
+    if (opening) return
+    setOpening(true)
+    onOpenStart() // reveal the Hero before the doors expose it
+    // Hand off just before the panels finish, so Hero is already fading up
+    window.setTimeout(onOpen, prefersReduced ? 0 : 1150)
+  }
+
+  const d = (delay: number) => ({ '--d': `${prefersReduced ? 0 : delay}s` }) as React.CSSProperties
+
+  return (
+    <div
+      /*
+        No background on the root — the two door panels already span 101% of
+        the width between them. A background here would stay put while the
+        doors slid away, so they'd part to reveal more emerald instead of the
+        Hero underneath.
+      */
+      className={`fixed inset-0 z-[100] flex items-center justify-center overflow-hidden ${
+        opening ? 'is-opening pointer-events-none' : ''
+      }`}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Open the invitation"
+    >
+      {/* --- Doors: two panels that part on open ---------------------------- */}
+      {(['left', 'right'] as const).map((side) => (
+        <div
+          key={side}
+          className={`pl-door absolute inset-y-0 w-[50.5%] bg-emerald-deep ${
+            side === 'left' ? 'pl-door-l left-0' : 'pl-door-r right-0'
+          }`}
+        >
+          {/* Layered depth: girih weave over a warm radial pool. The pattern is
+              a CSS background rather than an <svg> so it costs no DOM. */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(14,90,78,0.9),#083830_70%)]" />
+          <div className="pl-girih absolute inset-0 opacity-[0.14]" />
+          {/* Gold seam where the doors meet — hidden until they part, or it
+              reads as a scratch down the middle of the seal. */}
+          <div
+            className={`pl-seam absolute inset-y-0 w-px bg-gradient-to-b from-transparent via-gold/60 to-transparent ${
+              side === 'left' ? 'right-0' : 'left-0'
+            }`}
+          />
+        </div>
+      ))}
+
+      {/* --- Content -------------------------------------------------------- */}
+      <div className="pl-content relative z-10 flex flex-col items-center px-6 text-center">
+        {/* Seal + monogram */}
+        <div className="relative mb-9 flex h-52 w-52 items-center justify-center md:h-64 md:w-64">
+          <div className="pl-seal absolute inset-0 text-gold">
+            <DrawnSeal />
+          </div>
+
+          {/* Monogram — groom's initial first, matching the Hero, the Footer
+              and the boot shell in index.html.
+
+              Two things must stay in sync with that shell: the ORDER (a flip
+              here is visible the instant React takes over from the static
+              markup) and the SIZE — if the shell's copy is smaller, this one
+              paints later as a larger element and steals the Largest
+              Contentful Paint. */}
+          <div className="pl-scale relative flex items-center gap-3" style={d(0.15)}>
+            <span className="display text-5xl leading-none text-ivory md:text-6xl">
+              {groom.initial}
+            </span>
+            <svg viewBox="0 0 12 12" className="h-2 w-2 text-gold" aria-hidden="true">
+              <path d="M6 0 L12 6 L6 12 L0 6 Z" fill="currentColor" />
+            </svg>
+            <span className="display text-5xl leading-none text-ivory md:text-6xl">
+              {bride.initial}
+            </span>
+          </div>
+        </div>
+
+        {/* Bismillah */}
+        <div className="pl-rise flex flex-col items-center gap-4" style={d(0.45)}>
+          <p className="arabic text-xl text-gold/90 md:text-2xl" lang="ar">
+            {wedding.bismillah.arabic}
+          </p>
+          <p className="max-w-sm text-[0.7rem] leading-relaxed font-light tracking-[0.08em] text-balance text-ivory/60">
+            {wedding.bismillah.translation}
+          </p>
+        </div>
+
+        {/* Rule */}
+        <div
+          className="pl-rule my-8 h-px w-40 bg-gradient-to-r from-transparent via-gold/70 to-transparent"
+          style={d(0.65)}
+        />
+
+        {/* Invitation line */}
+        <p
+          className="pl-rise display mb-10 text-[clamp(1.75rem,5vw,2.75rem)] leading-tight font-light text-ivory italic"
+          style={d(0.8)}
+        >
+          You are cordially invited
+        </p>
+
+        {/* Open button — the gesture that also unlocks audio */}
+        <button
+          type="button"
+          onClick={handleOpen}
+          style={d(1)}
+          className="pl-rise group relative overflow-hidden rounded-[1px] border border-gold/70 bg-transparent px-12 py-5 font-body text-[0.7rem] font-light tracking-[0.34em] text-gold uppercase transition-colors duration-500 hover:-translate-y-0.5 hover:text-emerald-deep focus-visible:outline-gold"
+        >
+          {/* Gold fills from the bottom on hover */}
+          <span className="absolute inset-0 origin-bottom scale-y-0 bg-gold transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-y-100" />
+          <span className="relative">Open Invitation</span>
+        </button>
+
+        <p
+          className="pl-rise mt-6 text-[0.55rem] font-light tracking-[0.3em] text-ivory/35 uppercase"
+          style={d(1.35)}
+        >
+          {wedding.dateLabel}
+        </p>
+      </div>
+    </div>
+  )
+}

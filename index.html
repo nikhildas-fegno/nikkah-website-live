@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#FFFCF8" />
+
+    <title>Nishad &amp; Lubna — Nikah Invitation</title>
+    <meta
+      name="description"
+      content="Together with our families, we request the honour of your presence at our Nikah ceremony. Friday, 7 August 2026 at Taliparamba Masjid."
+    />
+
+    <!-- Open Graph / social sharing -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Nishad &amp; Lubna — Nikah Invitation" />
+    <meta
+      property="og:description"
+      content="Together with our families, we request the honour of your presence at our Nikah ceremony."
+    />
+    <!-- JPEG, not WebP: some share crawlers still won't render WebP. Stable,
+         unhashed path so the card keeps working across deploys. -->
+    <meta property="og:image" content="/images/hero-house.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!--
+      Display serif, body sans, and a naskh face for Arabic script.
+
+      Loaded without blocking render: the stylesheet is fetched at `print`
+      priority and promoted to `all` once it lands. A plain <link rel=stylesheet>
+      here costs ~2s of FCP on a throttled connection. font-display:swap means
+      text paints in the fallback immediately and swaps when the face arrives.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Poppins:wght@200;300;400;500&family=Amiri:wght@400;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Poppins:wght@200;300;400;500&family=Amiri:wght@400;700&display=swap"
+      media="print"
+      onload="this.media='all';this.onload=null"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Poppins:wght@200;300;400;500&family=Amiri:wght@400;700&display=swap"
+      />
+    </noscript>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": "Nikah of Nishad & Lubna",
+        "startDate": "2026-08-07T17:00:00+05:30",
+        "eventStatus": "https://schema.org/EventScheduled",
+        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+        "location": {
+          "@type": "Place",
+          "name": "Taliparamba Masjid",
+          "address": "Taliparamba, Kannur, Kerala, India"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <!--
+      Boot shell.
+
+      The whole page is client-rendered, so without this nothing paints until
+      React + Motion have parsed — measured at ~4s of render delay on a
+      throttled mobile CPU. This is plain HTML with inline styles (no external
+      CSS, no font, no JS), so it paints on the first frame.
+
+      It mimics the preloader's resting state exactly, and the real Preloader
+      mounts over it with the same emerald ground, so its removal in main.tsx
+      is invisible.
+    -->
+    <div
+      id="boot"
+      style="
+        position: fixed;
+        inset: 0;
+        z-index: 99;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.25rem;
+        background: radial-gradient(ellipse at center, #0e5a4e, #083830 70%);
+      "
+    >
+      <svg width="112" height="112" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+        <g stroke="#C8A96A" stroke-width="0.9" stroke-linejoin="round" opacity="0.5">
+          <rect x="21.5" y="21.5" width="57" height="57" />
+          <rect x="21.5" y="21.5" width="57" height="57" transform="rotate(45 50 50)" />
+          <circle cx="50" cy="50" r="40.5" opacity="0.5" />
+        </g>
+      </svg>
+      <!--
+        Sized to match the React monogram exactly (text-5xl / md:text-6xl).
+        If the shell's copy is smaller, React's paints later as a *larger*
+        element and steals LCP — which is what pushed LCP to 4.8s.
+      -->
+      <div
+        style="
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+          font-weight: 300;
+          font-size: 3rem;
+          line-height: 1;
+          color: #f8f5ef;
+        "
+      >
+        <span>N</span>
+        <span style="font-size: 0.5rem; color: #c8a96a">&#9670;</span>
+        <span>L</span>
+      </div>
+    </div>
+
+    <div id="root"></div>
+    <noscript>
+      You are cordially invited to the Nikah of Nishad &amp; Lubna on Friday, 7 August 2026 at 5:00
+      PM, Taliparamba Masjid, Kannur, Kerala. Reception at Babil Greens, Taliparamba. RSVP: +91 9526
+      222 228. Please enable JavaScript to view the full invitation.
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

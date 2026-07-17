@@ -1,0 +1,24 @@
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './styles/index.css'
+import App from './App'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+
+/**
+ * Retire the boot shell (see index.html) once React has painted the real
+ * Preloader over it. Both sit on the same emerald ground, so this is invisible
+ * — it just stops the shell from trapping clicks.
+ *
+ * Waits two frames: the first lands after React's initial commit, the second
+ * after that commit has actually been painted.
+ */
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    document.getElementById('boot')?.remove()
+  })
+})
