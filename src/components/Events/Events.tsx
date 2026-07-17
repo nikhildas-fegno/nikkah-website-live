@@ -166,7 +166,7 @@ export function Events() {
                   </p>
 
                   {/* Actions pinned to the card foot so both cards align */}
-                  <div className="mt-auto flex flex-wrap gap-3">
+                  <div className="mt-auto flex flex-wrap justify-center gap-3">
                     {/* No date, no calendar link — it would create an event at
                         an arbitrary time in the guest's calendar. */}
 
