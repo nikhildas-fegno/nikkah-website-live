@@ -237,7 +237,7 @@ export const music = {
    * ever begin from that click — browsers block audio without a gesture, and a
    * page that makes noise unbidden is worse than a silent one anyway.
    */
-  autoplayAfterOpen: false,
+  autoplayAfterOpen: true,
 } as const
 
 /* -------------------------------------------------------------------------- */

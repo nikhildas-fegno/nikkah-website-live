@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback } from 'react'
+import { lazy, Suspense, useCallback, useEffect } from 'react'
 import { Hero } from './components/Hero/Hero'
 import { Invitation } from './components/Invitation/Invitation'
 import { ScrollProgress } from './components/ScrollProgress/ScrollProgress'
@@ -60,6 +60,18 @@ export default function Site({
     if (lenis) lenis.scrollTo(0, { duration: 1.6 })
     else window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [lenisRef])
+
+  useEffect(() => {
+    const hash = window.location.hash
+    if (hash.length > 1) {
+      // Small delay to ensure layout is ready and lazy components are mounted enough
+      // Alternatively, just let lenis or native scroll IntoView handle it
+      setTimeout(() => {
+        const el = document.getElementById(hash.slice(1))
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
+    }
+  }, [])
 
   return (
     <>

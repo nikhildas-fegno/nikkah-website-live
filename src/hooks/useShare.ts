@@ -10,7 +10,9 @@ export function useShare(payload: { title: string; text: string }) {
   const [state, setState] = useState<ShareState>('idle')
 
   const share = useCallback(async () => {
-    const url = window.location.href
+    const urlObj = new URL(window.location.href)
+    urlObj.hash = 'invitation'
+    const url = urlObj.toString()
 
     if (navigator.share) {
       try {

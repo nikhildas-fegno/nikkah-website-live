@@ -13,10 +13,11 @@ import { music } from './data/wedding'
 const Site = lazy(() => import('./Site'))
 
 export default function App() {
+  const hasHash = typeof window !== 'undefined' && window.location.hash.length > 1
   /** The doors are parting: the Hero must be visible for them to reveal it. */
-  const [revealed, setRevealed] = useState(false)
+  const [revealed, setRevealed] = useState(hasHash)
   /** The doors have finished and the preloader is gone: unlock scrolling. */
-  const [opened, setOpened] = useState(false)
+  const [opened, setOpened] = useState(hasHash)
 
   const { isPlaying, isAvailable, toggle, play } = useMusic({
     src: music.src,
@@ -39,8 +40,38 @@ export default function App() {
   // browser that restored the previous scroll position.
   useEffect(() => {
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
-    window.scrollTo(0, 0)
-  }, [])
+    if (!hasHash) window.scrollTo(0, 0)
+  }, [hasHash])
+
+  // Try to play music automatically if we skipped the preloader (shared link with hash)
+  useEffect(() => {
+    if (hasHash && music.autoplayAfterOpen) {
+      play()
+    }
+  }, [hasHash, play])
+
+  // Fallback: If autoplay was blocked by the browser, try to start playing on the very
+  // first user interaction (click, tap, keypress) after the invitation is revealed.
+  useEffect(() => {
+    if (!music.autoplayAfterOpen || isPlaying || !revealed) return
+
+    const handleInteraction = () => {
+      play()
+      cleanup()
+    }
+
+    const cleanup = () => {
+      window.removeEventListener('click', handleInteraction)
+      window.removeEventListener('touchstart', handleInteraction)
+      window.removeEventListener('keydown', handleInteraction)
+    }
+
+    window.addEventListener('click', handleInteraction)
+    window.addEventListener('touchstart', handleInteraction)
+    window.addEventListener('keydown', handleInteraction)
+
+    return cleanup
+  }, [revealed, isPlaying, play])
 
   return (
     <>
