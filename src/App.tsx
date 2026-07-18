@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { Preloader } from './components/Loading/Preloader'
 import { useMusic } from './hooks/useMusic'
 import { music } from './data/wedding'
@@ -18,9 +18,7 @@ export default function App() {
   const [revealed, setRevealed] = useState(hasHash)
   /** The doors have finished and the preloader is gone: unlock scrolling. */
   const [opened, setOpened] = useState(hasHash)
-
-  // Track if the invitation has started opening (either via envelope-opening action or because it bypassed via hash)
-  const openingStartedRef = useRef(hasHash)
+  const [wantsMusic, setWantsMusic] = useState(hasHash && music.autoplayAfterOpen)
 
   const { isPlaying, isAvailable, toggle, play } = useMusic({
     src: music.src,
@@ -34,8 +32,10 @@ export default function App() {
    */
   const handleOpenStart = useCallback(() => {
     setRevealed(true)
-    openingStartedRef.current = true
-    if (music.autoplayAfterOpen) play()
+    if (music.autoplayAfterOpen) {
+      setWantsMusic(true)
+      void play()
+    }
   }, [play])
 
   const handleOpen = useCallback(() => setOpened(true), [])
@@ -50,35 +50,29 @@ export default function App() {
   // Try to play music automatically if we skipped the preloader (shared link with hash)
   useEffect(() => {
     if (hasHash && music.autoplayAfterOpen) {
-      play()
+      void play()
     }
   }, [hasHash, play])
 
-  // Fallback: If autoplay was blocked by the browser initially, try to play on any
-  // document-level user interaction (click, touchstart, keydown, mousedown)
-  // as soon as the user interacts with the page in any way.
+  // If the first attempt was blocked, retry from the next strong user gesture.
   useEffect(() => {
-    if (!music.autoplayAfterOpen || isPlaying) return
+    if (!wantsMusic || isPlaying) return
 
-    const tryPlaying = () => {
-      play()
-      cleanup()
+    const tryPlaying = async () => {
+      const didPlay = await play()
+      if (didPlay) cleanup()
     }
 
     const cleanup = () => {
-      document.removeEventListener('click', tryPlaying)
-      document.removeEventListener('touchstart', tryPlaying)
+      document.removeEventListener('pointerdown', tryPlaying)
       document.removeEventListener('keydown', tryPlaying)
-      document.removeEventListener('mousedown', tryPlaying)
     }
 
-    document.addEventListener('click', tryPlaying)
-    document.addEventListener('touchstart', tryPlaying, { passive: true })
+    document.addEventListener('pointerdown', tryPlaying)
     document.addEventListener('keydown', tryPlaying)
-    document.addEventListener('mousedown', tryPlaying)
 
     return cleanup
-  }, [isPlaying, play])
+  }, [isPlaying, play, wantsMusic])
 
   return (
     <>

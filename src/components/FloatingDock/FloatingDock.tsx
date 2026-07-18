@@ -1,10 +1,9 @@
 import { AnimatePresence, motion, useScroll, useMotionValueEvent } from 'framer-motion'
 import { useState } from 'react'
 import { ArrowUp, Check, Copy, Share2 } from 'lucide-react'
-import { contact, site } from '../../data/wedding'
+import { site } from '../../data/wedding'
 import { useShare } from '../../hooks/useShare'
 import { cn } from '../../utils/cn'
-import { WhatsApp } from '../ui/BrandIcons'
 import { MusicButton, MusicUnavailable } from '../MusicButton/MusicButton'
 
 interface FloatingDockProps {

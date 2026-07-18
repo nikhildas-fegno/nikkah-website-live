@@ -11,7 +11,8 @@ export function useShare(payload: { title: string; text: string }) {
 
   const share = useCallback(async () => {
     const urlObj = new URL(window.location.href)
-    urlObj.hash = 'invitation'
+    urlObj.hash = ''
+    urlObj.search = ''
     const url = urlObj.toString()
 
     if (navigator.share) {

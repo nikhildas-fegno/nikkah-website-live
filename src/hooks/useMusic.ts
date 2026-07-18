@@ -11,7 +11,7 @@ interface UseMusicReturn {
   /** False when the file is missing or the format is unsupported */
   isAvailable: boolean
   toggle: () => void
-  play: () => void
+  play: () => Promise<boolean>
   pause: () => void
 }
 
@@ -78,23 +78,26 @@ export function useMusic({ src, volume = 0.3, loop = true }: UseMusicOptions): U
     }, FADE_MS / FADE_STEPS)
   }, [])
 
-  const play = useCallback(() => {
+  const play = useCallback(async () => {
     const audio = audioRef.current
-    if (!audio) return
+    if (!audio) return false
     audio.preload = 'auto'
-    const promise = audio.play()
-    if (promise) {
-      promise
-        .then(() => {
-          setIsPlaying(true)
-          fadeTo(volume)
-        })
-        .catch(() => {
-          // Blocked (no gesture yet) or undecodable — stay silent, stay honest
-          setIsPlaying(false)
-        })
+    audio.volume = volume
+
+    try {
+      await audio.play()
+      setIsPlaying(true)
+      return true
+    } catch (err) {
+      // Browser autoplay policy blocks attempts that are not tied to a real
+      // gesture; missing/undecodable files are reported through the error event.
+      setIsPlaying(false)
+      if (err instanceof DOMException && err.name !== 'NotAllowedError') {
+        setIsAvailable(false)
+      }
+      return false
     }
-  }, [fadeTo, volume])
+  }, [volume])
 
   const pause = useCallback(() => {
     const audio = audioRef.current
@@ -107,7 +110,7 @@ export function useMusic({ src, volume = 0.3, loop = true }: UseMusicOptions): U
 
   const toggle = useCallback(() => {
     if (isPlaying) pause()
-    else play()
+    else void play()
   }, [isPlaying, pause, play])
 
   // Duck the audio when the guest tabs away; resume when they return
