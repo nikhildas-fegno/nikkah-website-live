@@ -230,12 +230,7 @@ export const music = {
   src: '/music/bg-music.mp3',
   title: 'Background music',
   volume: 0.32,
-  /**
-   * Start music from the "Open invitation" tap.
-   *
-   * It still cannot start on page load — browsers block audio without a trusted
-   * gesture — so the opening button is the consistent activation point.
-   */
+  /** Try music on page entry, then retry from the opening gesture if blocked. */
   autoplayAfterOpen: true,
 } as const
 

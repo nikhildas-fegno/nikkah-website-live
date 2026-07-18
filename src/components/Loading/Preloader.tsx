@@ -1,10 +1,12 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { bride, groom, wedding } from '../../data/wedding'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 import { starPoints } from '../ui/Ornaments'
 
 interface PreloaderProps {
+  /** Fires on the earliest user interaction that indicates they are opening. */
+  onMusicIntent: () => void
   /** Fires the instant the button is pressed — the doors are about to part, so
       whatever is underneath needs to be visible *now*. */
   onOpenStart: () => void
@@ -82,7 +84,7 @@ function DrawnSeal() {
  * arrives. On "Open Invitation" the seal blooms outward and two emerald panels
  * part like doors, revealing the Hero beneath.
  */
-export function Preloader({ onOpenStart, onOpen }: PreloaderProps) {
+export function Preloader({ onMusicIntent, onOpenStart, onOpen }: PreloaderProps) {
   const prefersReduced = useReducedMotion()
   const [opening, setOpening] = useState(false)
   const openedRef = useRef(false)
@@ -91,12 +93,57 @@ export function Preloader({ onOpenStart, onOpen }: PreloaderProps) {
     if (openedRef.current) return
     openedRef.current = true // ref, not state: the listeners below close over
     setOpening(true) //          the first render and would re-fire otherwise
+    onMusicIntent()
     onOpenStart() // reveal the Hero before the doors expose it
     // Hand off just before the panels finish, so Hero is already fading up
     window.setTimeout(onOpen, prefersReduced ? 0 : 1150)
-  }, [onOpen, onOpenStart, prefersReduced])
+  }, [onMusicIntent, onOpen, onOpenStart, prefersReduced])
 
   const d = (delay: number) => ({ '--d': `${prefersReduced ? 0 : delay}s` }) as React.CSSProperties
+
+  /**
+   * Scroll to open.
+   *
+   * The page is locked while this screen is up, so native `scroll` never fires.
+   * Wheel, touchmove and keyboard scroll keys are the actual opening gestures.
+   * The button remains as a reliable tap/click fallback.
+   */
+  useEffect(() => {
+    if (prefersReduced) return
+
+    const onWheel = (e: WheelEvent) => {
+      if (e.deltaY > 0) {
+        onMusicIntent()
+        handleOpen()
+      }
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (['ArrowDown', 'PageDown', ' ', 'Spacebar', 'Enter'].includes(e.key)) {
+        onMusicIntent()
+        handleOpen()
+      }
+    }
+    let touchStart = 0
+    const onTouchStart = (e: TouchEvent) => {
+      touchStart = e.touches[0]?.clientY ?? 0
+      onMusicIntent()
+    }
+    const onTouchMove = (e: TouchEvent) => {
+      if (touchStart - (e.touches[0]?.clientY ?? 0) > 24) handleOpen()
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: true })
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchmove', onTouchMove, { passive: true })
+
+    return () => {
+      window.removeEventListener('wheel', onWheel)
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchmove', onTouchMove)
+    }
+  }, [handleOpen, onMusicIntent, prefersReduced])
 
   return (
     <div
@@ -189,18 +236,18 @@ export function Preloader({ onOpenStart, onOpen }: PreloaderProps) {
         </p>
 
         {/*
-          The cue is a real <button> because browser audio policies require a
-          trusted user activation. Scroll and touchmove are intentionally not
-          used to open; they make music start inconsistently across devices.
+          The cue is a real <button>, not just a visual hint, so guests can
+          still open the invitation by click, tap, keyboard, or screen reader.
         */}
         <button
           type="button"
+          onPointerDown={onMusicIntent}
           onClick={handleOpen}
           style={d(1)}
           className="pl-rise group flex flex-col items-center gap-4 bg-transparent focus-visible:outline-gold"
         >
           <span className="font-body text-[0.62rem] font-light tracking-[0.34em] text-gold/90 uppercase transition-colors duration-500 group-hover:text-gold">
-            Open invitation
+            Scroll to open
           </span>
 
           {/* A gold thread falling into a chevron — the page's own language for

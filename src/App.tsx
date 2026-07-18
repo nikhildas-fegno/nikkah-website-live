@@ -24,6 +24,12 @@ export default function App() {
     volume: music.volume,
   })
 
+  const handleMusicIntent = useCallback(() => {
+    if (music.autoplayAfterOpen && !isPlaying) {
+      void play()
+    }
+  }, [isPlaying, play])
+
   /**
    * The one gesture that unlocks audio. Browsers only permit playback from a
    * real user interaction, so the button press is where it has to happen —
@@ -45,9 +51,23 @@ export default function App() {
     if (!hasHash) window.scrollTo(0, 0)
   }, [hasHash])
 
+  // Best-effort audible autoplay on page entry. Many browsers block this until
+  // a user gesture, so scroll/touch/button opening still retries via Preloader.
+  useEffect(() => {
+    if (music.autoplayAfterOpen) {
+      void play()
+    }
+  }, [play])
+
   return (
     <>
-      {!opened && <Preloader onOpenStart={handleOpenStart} onOpen={handleOpen} />}
+      {!opened && (
+        <Preloader
+          onMusicIntent={handleMusicIntent}
+          onOpenStart={handleOpenStart}
+          onOpen={handleOpen}
+        />
+      )}
 
       {/*
         Site mounts immediately, underneath the preloader, and streams in while
