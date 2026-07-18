@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { bride, groom, wedding } from '../../data/wedding'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
@@ -96,48 +96,6 @@ export function Preloader({ onOpenStart, onOpen }: PreloaderProps) {
     window.setTimeout(onOpen, prefersReduced ? 0 : 1150)
   }, [onOpen, onOpenStart, prefersReduced])
 
-  /**
-   * Scroll to open.
-   *
-   * The page is deliberately locked while this screen is up, so no `scroll`
-   * event will ever fire — `wheel` and `touchmove` still do, and they're what a
-   * guest actually performs when they try to scroll. Keys are included because
-   * a keyboard user's "scroll" is Space or ArrowDown.
-   *
-   * The cue below is still a real <button>, so this isn't the only way in:
-   * clicking or pressing Enter on it works too, which keeps the invitation
-   * openable by anyone who can't produce a scroll gesture at all.
-   */
-  useEffect(() => {
-    if (prefersReduced) return
-
-    const onWheel = (e: WheelEvent) => {
-      if (e.deltaY > 0) handleOpen() // downward only — an upward flick isn't intent
-    }
-    const onKey = (e: KeyboardEvent) => {
-      if (['ArrowDown', 'PageDown', ' ', 'Spacebar', 'Enter'].includes(e.key)) handleOpen()
-    }
-    let touchStart = 0
-    const onTouchStart = (e: TouchEvent) => {
-      touchStart = e.touches[0]?.clientY ?? 0
-    }
-    const onTouchMove = (e: TouchEvent) => {
-      // A deliberate upward drag of the thumb = scrolling down the page
-      if (touchStart - (e.touches[0]?.clientY ?? 0) > 24) handleOpen()
-    }
-
-    window.addEventListener('wheel', onWheel, { passive: true })
-    window.addEventListener('keydown', onKey)
-    window.addEventListener('touchstart', onTouchStart, { passive: true })
-    window.addEventListener('touchmove', onTouchMove, { passive: true })
-    return () => {
-      window.removeEventListener('wheel', onWheel)
-      window.removeEventListener('keydown', onKey)
-      window.removeEventListener('touchstart', onTouchStart)
-      window.removeEventListener('touchmove', onTouchMove)
-    }
-  }, [handleOpen, prefersReduced])
-
   const d = (delay: number) => ({ '--d': `${prefersReduced ? 0 : delay}s` }) as React.CSSProperties
 
   return (
@@ -231,10 +189,9 @@ export function Preloader({ onOpenStart, onOpen }: PreloaderProps) {
         </p>
 
         {/*
-          The cue is a real <button>, not a decorative hint. Scrolling is the
-          intended gesture, but a keyboard or screen-reader user may have no way
-          to produce one — this keeps the invitation openable by Tab + Enter,
-          and by a plain click for anyone who reaches for it.
+          The cue is a real <button> because browser audio policies require a
+          trusted user activation. Scroll and touchmove are intentionally not
+          used to open; they make music start inconsistently across devices.
         */}
         <button
           type="button"
@@ -243,7 +200,7 @@ export function Preloader({ onOpenStart, onOpen }: PreloaderProps) {
           className="pl-rise group flex flex-col items-center gap-4 bg-transparent focus-visible:outline-gold"
         >
           <span className="font-body text-[0.62rem] font-light tracking-[0.34em] text-gold/90 uppercase transition-colors duration-500 group-hover:text-gold">
-            Scroll to open
+            Open invitation
           </span>
 
           {/* A gold thread falling into a chevron — the page's own language for

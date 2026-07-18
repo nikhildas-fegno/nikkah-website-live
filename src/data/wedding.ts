@@ -231,11 +231,10 @@ export const music = {
   title: 'Background music',
   volume: 0.32,
   /**
-   * The page stays silent until a guest taps the music button themselves.
+   * Start music from the "Open invitation" tap.
    *
-   * Set true to start it on "Open Invitation" instead. Even then it can only
-   * ever begin from that click — browsers block audio without a gesture, and a
-   * page that makes noise unbidden is worse than a silent one anyway.
+   * It still cannot start on page load — browsers block audio without a trusted
+   * gesture — so the opening button is the consistent activation point.
    */
   autoplayAfterOpen: true,
 } as const

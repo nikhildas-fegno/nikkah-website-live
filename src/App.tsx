@@ -18,7 +18,6 @@ export default function App() {
   const [revealed, setRevealed] = useState(hasHash)
   /** The doors have finished and the preloader is gone: unlock scrolling. */
   const [opened, setOpened] = useState(hasHash)
-  const [wantsMusic, setWantsMusic] = useState(hasHash && music.autoplayAfterOpen)
 
   const { isPlaying, isAvailable, toggle, play } = useMusic({
     src: music.src,
@@ -33,7 +32,6 @@ export default function App() {
   const handleOpenStart = useCallback(() => {
     setRevealed(true)
     if (music.autoplayAfterOpen) {
-      setWantsMusic(true)
       void play()
     }
   }, [play])
@@ -46,33 +44,6 @@ export default function App() {
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
     if (!hasHash) window.scrollTo(0, 0)
   }, [hasHash])
-
-  // Try to play music automatically if we skipped the preloader (shared link with hash)
-  useEffect(() => {
-    if (hasHash && music.autoplayAfterOpen) {
-      void play()
-    }
-  }, [hasHash, play])
-
-  // If the first attempt was blocked, retry from the next strong user gesture.
-  useEffect(() => {
-    if (!wantsMusic || isPlaying) return
-
-    const tryPlaying = async () => {
-      const didPlay = await play()
-      if (didPlay) cleanup()
-    }
-
-    const cleanup = () => {
-      document.removeEventListener('pointerdown', tryPlaying)
-      document.removeEventListener('keydown', tryPlaying)
-    }
-
-    document.addEventListener('pointerdown', tryPlaying)
-    document.addEventListener('keydown', tryPlaying)
-
-    return cleanup
-  }, [isPlaying, play, wantsMusic])
 
   return (
     <>
