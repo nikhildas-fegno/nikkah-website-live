@@ -17,6 +17,34 @@ interface UseMusicReturn {
 
 const FADE_MS = 900
 const FADE_STEPS = 30
+const DEBUG_PREFIX = '[music]'
+
+function logMusic(message: string, details?: Record<string, unknown>) {
+  console.log(DEBUG_PREFIX, message, details ?? '')
+}
+
+function getAudioState(audio: HTMLAudioElement) {
+  return {
+    autoplay: audio.autoplay,
+    currentSrc: audio.currentSrc,
+    currentTime: audio.currentTime,
+    duration: Number.isFinite(audio.duration) ? audio.duration : null,
+    ended: audio.ended,
+    error: audio.error
+      ? {
+          code: audio.error.code,
+          message: audio.error.message,
+        }
+      : null,
+    muted: audio.muted,
+    networkState: audio.networkState,
+    paused: audio.paused,
+    preload: audio.preload,
+    readyState: audio.readyState,
+    src: audio.getAttribute('src'),
+    volume: audio.volume,
+  }
+}
 
 /**
  * Background audio with gentle fades.
@@ -32,30 +60,70 @@ export function useMusic({ src, volume = 0.3, loop = true }: UseMusicOptions): U
   const [isAvailable, setIsAvailable] = useState(true)
 
   useEffect(() => {
-    const audio = new Audio(src)
+    const existingAudio = document.getElementById('bg-music')
+    const audio =
+      existingAudio instanceof HTMLAudioElement ? existingAudio : new Audio(src)
+    const ownsAudio = audio !== existingAudio
+
+    logMusic('hook mounted', {
+      foundExistingAudio: existingAudio instanceof HTMLAudioElement,
+      ownsAudio,
+      requestedSrc: src,
+    })
+
+    if (ownsAudio || audio.getAttribute('src') !== src) {
+      audio.src = src
+    }
     audio.loop = loop
-    audio.preload = 'none' // don't spend bytes until the user asks for sound
-    audio.volume = 0
+    audio.preload = 'auto'
+    audio.volume = volume
     audioRef.current = audio
 
     const onError = () => {
+      logMusic('audio error event', getAudioState(audio))
       setIsAvailable(false)
       setIsPlaying(false)
     }
-    const onEnded = () => !loop && setIsPlaying(false)
+    const onEnded = () => {
+      logMusic('audio ended event', getAudioState(audio))
+      if (!loop) setIsPlaying(false)
+    }
+    const onPlaying = () => {
+      logMusic('audio playing event', getAudioState(audio))
+      setIsPlaying(true)
+    }
+    const onPause = () => {
+      logMusic('audio pause event', getAudioState(audio))
+      setIsPlaying(false)
+    }
+    const onCanPlay = () => logMusic('audio canplay event', getAudioState(audio))
+    const onLoadedMetadata = () => logMusic('audio loadedmetadata event', getAudioState(audio))
 
     audio.addEventListener('error', onError)
     audio.addEventListener('ended', onEnded)
+    audio.addEventListener('playing', onPlaying)
+    audio.addEventListener('pause', onPause)
+    audio.addEventListener('canplay', onCanPlay)
+    audio.addEventListener('loadedmetadata', onLoadedMetadata)
+    logMusic('audio prepared', getAudioState(audio))
+    setIsPlaying(!audio.paused)
 
     return () => {
+      logMusic('hook cleanup', { ownsAudio, state: getAudioState(audio) })
       window.clearInterval(fadeRef.current)
       audio.removeEventListener('error', onError)
       audio.removeEventListener('ended', onEnded)
-      audio.pause()
-      audio.src = ''
+      audio.removeEventListener('playing', onPlaying)
+      audio.removeEventListener('pause', onPause)
+      audio.removeEventListener('canplay', onCanPlay)
+      audio.removeEventListener('loadedmetadata', onLoadedMetadata)
+      if (ownsAudio) {
+        audio.pause()
+        audio.src = ''
+      }
       audioRef.current = null
     }
-  }, [src, loop])
+  }, [src, loop, volume])
 
   const fadeTo = useCallback((target: number, onDone?: () => void) => {
     const audio = audioRef.current
@@ -80,15 +148,30 @@ export function useMusic({ src, volume = 0.3, loop = true }: UseMusicOptions): U
 
   const play = useCallback(async () => {
     const audio = audioRef.current
-    if (!audio) return false
+    if (!audio) {
+      logMusic('play requested but no audio element exists')
+      return false
+    }
     audio.preload = 'auto'
     audio.volume = volume
+    logMusic('play requested', getAudioState(audio))
 
     try {
       await audio.play()
+      logMusic('play resolved', getAudioState(audio))
       setIsPlaying(true)
       return true
     } catch (err) {
+      logMusic('play rejected', {
+        state: getAudioState(audio),
+        error:
+          err instanceof Error
+            ? {
+                name: err.name,
+                message: err.message,
+              }
+            : err,
+      })
       // Browser autoplay policy blocks attempts that are not tied to a real
       // gesture; missing/undecodable files are reported through the error event.
       setIsPlaying(false)
@@ -101,7 +184,11 @@ export function useMusic({ src, volume = 0.3, loop = true }: UseMusicOptions): U
 
   const pause = useCallback(() => {
     const audio = audioRef.current
-    if (!audio) return
+    if (!audio) {
+      logMusic('pause requested but no audio element exists')
+      return
+    }
+    logMusic('pause requested', getAudioState(audio))
     fadeTo(0, () => {
       audio.pause()
       setIsPlaying(false)
@@ -118,8 +205,25 @@ export function useMusic({ src, volume = 0.3, loop = true }: UseMusicOptions): U
     const onVisibility = () => {
       const audio = audioRef.current
       if (!audio || !isPlaying) return
-      if (document.hidden) audio.pause()
-      else void audio.play().catch(() => setIsPlaying(false))
+      if (document.hidden) {
+        logMusic('document hidden, pausing', getAudioState(audio))
+        audio.pause()
+      } else {
+        logMusic('document visible, resuming', getAudioState(audio))
+        void audio.play().catch((err) => {
+          logMusic('visibility resume rejected', {
+            state: getAudioState(audio),
+            error:
+              err instanceof Error
+                ? {
+                    name: err.name,
+                    message: err.message,
+                  }
+                : err,
+          })
+          setIsPlaying(false)
+        })
+      }
     }
     document.addEventListener('visibilitychange', onVisibility)
     return () => document.removeEventListener('visibilitychange', onVisibility)

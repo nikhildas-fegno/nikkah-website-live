@@ -11,6 +11,12 @@ import { music } from './data/wedding'
  * pure CSS — paints without waiting on any of them.
  */
 const Site = lazy(() => import('./Site'))
+const DEBUG_MUSIC = true
+
+function logMusic(message: string, details?: Record<string, unknown>) {
+  if (!DEBUG_MUSIC) return
+  console.log('[music]', message, details ?? '')
+}
 
 export default function App() {
   const hasHash = typeof window !== 'undefined' && window.location.hash.length > 1
@@ -25,6 +31,10 @@ export default function App() {
   })
 
   const handleMusicIntent = useCallback(() => {
+    logMusic('music intent from preloader', {
+      autoplayAfterOpen: music.autoplayAfterOpen,
+      isPlaying,
+    })
     if (music.autoplayAfterOpen && !isPlaying) {
       void play()
     }
@@ -36,6 +46,7 @@ export default function App() {
    * never on mount.
    */
   const handleOpenStart = useCallback(() => {
+    logMusic('open start', { autoplayAfterOpen: music.autoplayAfterOpen })
     setRevealed(true)
     if (music.autoplayAfterOpen) {
       void play()
@@ -55,6 +66,7 @@ export default function App() {
   // a user gesture, so scroll/touch/button opening still retries via Preloader.
   useEffect(() => {
     if (music.autoplayAfterOpen) {
+      logMusic('page-entry autoplay attempt')
       void play()
     }
   }, [play])

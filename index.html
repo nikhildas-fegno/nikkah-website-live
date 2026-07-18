@@ -86,6 +86,38 @@
     </script>
   </head>
   <body>
+    <audio id="bg-music" src="/music/bg-music.mp3" preload="auto" autoplay loop playsinline></audio>
+    <script>
+      ;(() => {
+        const audio = document.getElementById('bg-music')
+        if (!(audio instanceof HTMLAudioElement)) return
+
+        const isMobileLike =
+          navigator.maxTouchPoints > 0 ||
+          matchMedia('(hover: none), (pointer: coarse)').matches
+
+        const playFromMobileGesture = () => {
+          if (!isMobileLike || !audio.paused) return cleanup()
+          audio.volume = 0.32
+          audio.play().then(cleanup).catch(() => {})
+        }
+
+        const cleanup = () => {
+          window.removeEventListener('touchstart', playFromMobileGesture, true)
+          window.removeEventListener('pointerdown', playFromMobileGesture, true)
+        }
+
+        window.addEventListener('touchstart', playFromMobileGesture, {
+          capture: true,
+          passive: true,
+        })
+        window.addEventListener('pointerdown', playFromMobileGesture, {
+          capture: true,
+          passive: true,
+        })
+      })()
+    </script>
+
     <!--
       Boot shell.
 

@@ -4,6 +4,13 @@ import { bride, groom, wedding } from '../../data/wedding'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 import { starPoints } from '../ui/Ornaments'
 
+const DEBUG_MUSIC = true
+
+function logMusic(message: string, details?: Record<string, unknown>) {
+  if (!DEBUG_MUSIC) return
+  console.log('[music]', message, details ?? '')
+}
+
 interface PreloaderProps {
   /** Fires on the earliest user interaction that indicates they are opening. */
   onMusicIntent: () => void
@@ -92,6 +99,7 @@ export function Preloader({ onMusicIntent, onOpenStart, onOpen }: PreloaderProps
   const handleOpen = useCallback(() => {
     if (openedRef.current) return
     openedRef.current = true // ref, not state: the listeners below close over
+    logMusic('preloader opening')
     setOpening(true) //          the first render and would re-fire otherwise
     onMusicIntent()
     onOpenStart() // reveal the Hero before the doors expose it
@@ -105,20 +113,28 @@ export function Preloader({ onMusicIntent, onOpenStart, onOpen }: PreloaderProps
    * Scroll to open.
    *
    * The page is locked while this screen is up, so native `scroll` never fires.
-   * Wheel, touchmove and keyboard scroll keys are the actual opening gestures.
-   * The button remains as a reliable tap/click fallback.
+   * Wheel, touchmove and keyboard scroll keys are opening gestures. Pointerdown
+   * also opens because browsers require a tap/click-style activation for audio.
    */
   useEffect(() => {
     if (prefersReduced) return
 
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      logMusic('preloader pointerdown open', { pointerType: e.pointerType })
+      onMusicIntent()
+      handleOpen()
+    }
     const onWheel = (e: WheelEvent) => {
       if (e.deltaY > 0) {
+        logMusic('preloader wheel open', { deltaY: e.deltaY })
         onMusicIntent()
         handleOpen()
       }
     }
     const onKey = (e: KeyboardEvent) => {
       if (['ArrowDown', 'PageDown', ' ', 'Spacebar', 'Enter'].includes(e.key)) {
+        logMusic('preloader key open', { key: e.key })
         onMusicIntent()
         handleOpen()
       }
@@ -126,18 +142,25 @@ export function Preloader({ onMusicIntent, onOpenStart, onOpen }: PreloaderProps
     let touchStart = 0
     const onTouchStart = (e: TouchEvent) => {
       touchStart = e.touches[0]?.clientY ?? 0
+      logMusic('preloader touchstart', { touchStart })
       onMusicIntent()
     }
     const onTouchMove = (e: TouchEvent) => {
-      if (touchStart - (e.touches[0]?.clientY ?? 0) > 24) handleOpen()
+      const distance = touchStart - (e.touches[0]?.clientY ?? 0)
+      if (distance > 24) {
+        logMusic('preloader touchmove open', { distance })
+        handleOpen()
+      }
     }
 
+    window.addEventListener('pointerdown', onPointerDown, { passive: true })
     window.addEventListener('wheel', onWheel, { passive: true })
     window.addEventListener('keydown', onKey)
     window.addEventListener('touchstart', onTouchStart, { passive: true })
     window.addEventListener('touchmove', onTouchMove, { passive: true })
 
     return () => {
+      window.removeEventListener('pointerdown', onPointerDown)
       window.removeEventListener('wheel', onWheel)
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('touchstart', onTouchStart)
@@ -237,17 +260,20 @@ export function Preloader({ onMusicIntent, onOpenStart, onOpen }: PreloaderProps
 
         {/*
           The cue is a real <button>, not just a visual hint, so guests can
-          still open the invitation by click, tap, keyboard, or screen reader.
+          open the invitation by click, tap, scroll, keyboard, or screen reader.
         */}
         <button
           type="button"
-          onPointerDown={onMusicIntent}
+          onPointerDown={() => {
+            logMusic('open button pointerdown')
+            onMusicIntent()
+          }}
           onClick={handleOpen}
           style={d(1)}
           className="pl-rise group flex flex-col items-center gap-4 bg-transparent focus-visible:outline-gold"
         >
           <span className="font-body text-[0.62rem] font-light tracking-[0.34em] text-gold/90 uppercase transition-colors duration-500 group-hover:text-gold">
-            Scroll to open
+            Tap or scroll to open
           </span>
 
           {/* A gold thread falling into a chevron — the page's own language for
