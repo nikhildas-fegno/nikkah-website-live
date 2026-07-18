@@ -55,29 +55,27 @@ export default function App() {
   }, [hasHash, play])
 
   // Fallback: If autoplay was blocked by the browser initially, try to play on any
-  // document-level user interaction (click, touchstart, keydown, wheel/scroll)
-  // as long as the invitation opening sequence has started.
+  // document-level user interaction (click, touchstart, keydown, mousedown)
+  // as soon as the user interacts with the page in any way.
   useEffect(() => {
     if (!music.autoplayAfterOpen || isPlaying) return
 
     const tryPlaying = () => {
-      if (openingStartedRef.current) {
-        play()
-        cleanup()
-      }
+      play()
+      cleanup()
     }
 
     const cleanup = () => {
       document.removeEventListener('click', tryPlaying)
       document.removeEventListener('touchstart', tryPlaying)
       document.removeEventListener('keydown', tryPlaying)
-      document.removeEventListener('wheel', tryPlaying)
+      document.removeEventListener('mousedown', tryPlaying)
     }
 
     document.addEventListener('click', tryPlaying)
     document.addEventListener('touchstart', tryPlaying, { passive: true })
     document.addEventListener('keydown', tryPlaying)
-    document.addEventListener('wheel', tryPlaying, { passive: true })
+    document.addEventListener('mousedown', tryPlaying)
 
     return cleanup
   }, [isPlaying, play])
