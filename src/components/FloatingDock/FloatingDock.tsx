@@ -60,7 +60,7 @@ export function FloatingDock({
       {/* ---- The rest, stacked right ------------------------------------- */}
       <div className="fixed right-5 bottom-5 z-40 flex flex-col items-center gap-3 md:right-7 md:bottom-7">
         {/* WhatsApp */}
-        <motion.a
+        {/* <motion.a
           href={`https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(site.shareText)}`}
           target="_blank"
           rel="noopener noreferrer"
@@ -70,7 +70,7 @@ export function FloatingDock({
           className={buttonBase}
         >
           <WhatsApp className="h-[1.15rem] w-[1.15rem]" />
-        </motion.a>
+        </motion.a> */}
 
         {/* Share */}
         <motion.button
