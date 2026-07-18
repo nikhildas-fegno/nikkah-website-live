@@ -25,7 +25,7 @@ export function Events() {
   /**
    * Copy and layout follow the data rather than being written for a fixed
    * count. The section previously promised "two gatherings … your presence at
-   * both" while `events` held only the Nikah — so add or remove an event and
+   * both" while `events` held only the Nikkah — so add or remove an event and
    * the wording, the grid and the heading all correct themselves.
    */
   const many = events.length > 1
@@ -40,7 +40,7 @@ export function Events() {
 
       <div className="shell relative">
         {/*
-          "Ceremony", not "Celebration": a nikah at the masjid is a
+          "Ceremony", not "Celebration": a Nikkah ceremony is a
           solemnisation — the celebrating is what a reception is for. If the
           Reception returns to `events`, the plural wording turns back on.
 

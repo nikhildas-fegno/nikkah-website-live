@@ -80,7 +80,7 @@ export function Hero({ active, onScrollCue }: HeroProps) {
       ref={sectionRef}
       id="hero"
       className="relative flex h-[100svh] min-h-[36rem] items-center justify-center overflow-hidden bg-emerald-deep"
-      aria-label="Nikah invitation"
+      aria-label="Nikkah invitation"
     >
       {/* ---- Plane 1: girih weave, masked away from the type --------------- */}
       <motion.div
@@ -133,7 +133,7 @@ export function Hero({ active, onScrollCue }: HeroProps) {
           >
             <span className="h-px w-10 bg-gradient-to-r from-transparent to-gold/70" />
             <span className="font-body text-[0.6rem] font-light tracking-[0.42em] text-gold uppercase md:text-[0.68rem]">
-              Nikah Invitation
+              Nikkah Invitation
             </span>
             <span className="h-px w-10 bg-gradient-to-l from-transparent to-gold/70" />
           </motion.div>

@@ -36,7 +36,7 @@ export interface WeddingEvent {
   venue: string
   address: string
   description: string
-  icon: 'nikah' | 'walima'
+  icon: 'nikkah' | 'walima'
   mapsUrl: string
 }
 
@@ -137,26 +137,6 @@ export const wedding = {
   dayLabel: 'Friday',
   // VERIFY: Umm al-Qura reckoning. Local moon sighting may differ by a day.
   hijriLabel: '24 Safar 1448',
-  /**
-   * The family home — one photo, every device. Shown in the Invitation section
-   * (not the Hero: a fullscreen crop mangled it on phones).
-   *
-   * The frame is pinned to `heroImageAspect`, so the photo renders at its own
-   * native ratio and is never cropped on any screen. **If you re-crop the file,
-   * update that ratio to match** or the frame will quietly start cutting the
-   * edges off the very crop you just made.
-   */
-  heroImage: '/images/hero-house.jpg', // 1254×722 — also the OG share image
-  /** WebP is 136 KB vs the JPEG's 227 KB. Non-WebP browsers fall back. */
-  heroImageWebp: '/images/hero-house.webp',
-  /**
-   * Raw CSS aspect-ratio, applied inline — deliberately NOT a Tailwind class.
-   * An `aspect-[1254/722]` string here silently fails: Tailwind's scanner
-   * doesn't pick arbitrary utilities out of this data file, so no rule is
-   * emitted and the frame collapses to zero height.
-   */
-  heroImageAspect: '1254 / 722',
-  heroImageAlt: 'The family home in Taliparamba',
   quote: {
     text: 'And among His signs is that He created for you mates from among yourselves, that you may dwell in tranquillity with them, and He has put love and mercy between your hearts.',
     source: 'Surah Ar-Rum, 30:21',
@@ -166,7 +146,7 @@ export const wedding = {
     translation: 'In the Name of Allah, the Most Compassionate, the Most Merciful',
   },
   invitationMessage:
-    'Together with our families, we request the honour of your presence at our Nikah ceremony.',
+    'Together with our families, we request the honour of your presence at our Nikkah ceremony.',
   invitationSubtext:
     'With hearts full of gratitude to Allah, we invite you to share in the joy of this blessed union — and to remember us in your prayers.',
 } as const
@@ -176,22 +156,14 @@ export const wedding = {
 /* -------------------------------------------------------------------------- */
 
 export const venue = {
-  name: 'Taliparamba Masjid',
-  address: 'Taliparamba, Kannur, Kerala',
-  /**
-   * VERIFY: no maps link was supplied, so these are *name searches*, not an
-   * exact pin — Google may land guests on the wrong mosque.
-   *
-   * To fix: open Google Maps → find the exact building → Share → Copy link,
-   * and paste it into `mapsUrl`. For `embedUrl`, replace the `q=` value with
-   * the coordinates, e.g. `q=12.0417,75.3608`.
-   */
-  mapsUrl: 'https://maps.google.com/?q=Taliparamba+Juma+Masjid+Kannur+Kerala',
+  name: 'Babil Greens Convention Centre',
+  address: 'Oman Nagar, Andikalam, Kanjirangad P.O., Taliparamba, Kerala 670142',
+  mapsUrl: 'https://maps.app.goo.gl/7rZJaqCPiR2ZJRHj6',
   directionsUrl:
-    'https://www.google.com/maps/dir/?api=1&destination=Taliparamba+Juma+Masjid+Kannur+Kerala',
+    'https://www.google.com/maps/dir/?api=1&destination=Babil+Greens+Convention+Centre+Oman+Nagar+Andikalam+Kanjirangad+Taliparamba+Kerala+670142',
   /** Keyless embed — `output=embed` needs no API key and no billing account. */
   embedUrl:
-    'https://maps.google.com/maps?q=Taliparamba+Juma+Masjid+Kannur+Kerala&z=15&output=embed',
+    'https://maps.google.com/maps?q=Babil+Greens+Convention+Centre+Oman+Nagar+Andikalam+Kanjirangad+Taliparamba+Kerala+670142&z=15&output=embed',
 } as const
 
 /* -------------------------------------------------------------------------- */
@@ -200,17 +172,17 @@ export const venue = {
 
 export const events: WeddingEvent[] = [
   {
-    id: 'nikah',
-    name: 'Nikah',
+    id: 'nikkah-reception',
+    name: 'Nikkah & Reception',
     arabicName: 'نكاح',
     dateTime: '2026-08-07T17:00:00+05:30',
-    timeLabel: '5:00 PM',
-    venue: 'Taliparamba Masjid',
-    address: 'Taliparamba, Kannur, Kerala',
+    timeLabel: '5:00 PM onwards',
+    venue: venue.name,
+    address: venue.address,
     description:
-      'The solemnisation of our marriage, followed by dua. We would be honoured to have you witness our nikah and share in the blessings of the day.',
-    icon: 'nikah',
-    mapsUrl: 'https://maps.google.com/?q=Taliparamba+Juma+Masjid+Kannur+Kerala',
+      'The solemnisation of our marriage, followed by dua and reception at the same venue. We would be honoured to have you share in the blessings and joy of the day.',
+    icon: 'nikkah',
+    mapsUrl: venue.mapsUrl,
   },
 ]
 
@@ -273,8 +245,8 @@ export const music = {
 /* -------------------------------------------------------------------------- */
 
 export const site = {
-  title: `${groom.firstName} & ${bride.firstName} — Nikah Invitation`,
-  shareText: `You are cordially invited to the Nikah of ${groom.firstName} & ${bride.firstName}, ${wedding.dateLabel}.`,
+  title: `${groom.firstName} & ${bride.firstName} — Nikkah Invitation`,
+  shareText: `You are cordially invited to the Nikkah of ${groom.firstName} & ${bride.firstName}, ${wedding.dateLabel}.`,
   url: typeof window !== 'undefined' ? window.location.href : '',
 } as const
 

@@ -1,4 +1,4 @@
-# Nikah invitation — a private celebration, but nothing here is secret.
+# Nikkah invitation — a private celebration, but nothing here is secret.
 User-agent: *
 Allow: /
 

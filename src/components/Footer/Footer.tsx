@@ -2,7 +2,6 @@ import { Mail, Phone } from 'lucide-react'
 import type { ComponentType } from 'react'
 import { bride, groom, socials, wedding, contact, type SocialLink } from '../../data/wedding'
 import { Facebook, Instagram } from '../ui/BrandIcons'
-import { SmartImage } from '../ui/SmartImage'
 import { Reveal, TextReveal } from '../ui/Reveal'
 import { ArabesqueDivider, Khatim, StarEight } from '../ui/Ornaments'
 import { Particles } from '../FloatingPatterns/Particles'
@@ -14,27 +13,11 @@ const SOCIAL_ICONS: Record<SocialLink['icon'], ComponentType<{ className?: strin
   phone: Phone,
 }
 
-/**
- * Footer over a heavily blurred, darkened crop of the house image — the same
- * photograph that opens the site, returned to at the end out of focus. It reads
- * as memory rather than as a repeated asset.
- */
 export function Footer() {
   return (
     <footer className="relative overflow-hidden bg-emerald-deep" aria-label="Thank you">
-      {/* ---- Background: the house, blurred beyond recognition ------------- */}
+      {/* ---- Background: ornamental light and deep emerald ------------------ */}
       <div className="absolute inset-0" aria-hidden="true">
-        <SmartImage
-          src={wedding.heroImage}
-          /* Same file the Invitation already showed, so this costs no extra
-             download — it comes straight from cache. Blurred to 14px and
-             dimmed to 15%, it's pure texture. */
-          sources={[{ srcSet: wedding.heroImageWebp, type: 'image/webp' }]}
-          alt=""
-          className="h-full w-full"
-          imgClassName="scale-110 blur-[14px]"
-        />
-        <div className="absolute inset-0 bg-emerald-deep/85" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_30%,rgba(200,169,106,0.16),transparent_70%)]" />
         <div className="absolute inset-0 bg-gradient-to-b from-emerald-deep via-transparent to-emerald-deep" />
       </div>

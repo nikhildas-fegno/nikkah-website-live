@@ -1,8 +1,8 @@
-# Nikah Invitation — Nishad & Lubna
+# Nikkah Invitation — Nishad & Lubna
 
-**Friday, 7 August 2026 · 5:00 PM · Taliparamba Masjid** — reception at Babil Greens, Taliparamba.
+**Friday, 7 August 2026 · 5:00 PM · Babil Greens Convention Centre** — reception at the same venue.
 
-A premium single-page Nikah invitation. React 19 · Vite · TypeScript · Tailwind v4 · Framer Motion · GSAP + ScrollTrigger · Lenis · Lucide · Day.js.
+A premium single-page Nikkah invitation. React 19 · Vite · TypeScript · Tailwind v4 · Framer Motion · GSAP + ScrollTrigger · Lenis · Lucide · Day.js.
 
 ```bash
 npm install
@@ -21,7 +21,6 @@ these **exact paths** and they take over with no code change.
 
 | Path                           | Used by                             | Suggested size      |
 | ------------------------------ | ----------------------------------- | ------------------- |
-| `public/images/hero-house.jpg` | Hero background, blurred footer     | 2400×1600, < 400 KB |
 | `public/images/bride.jpg`      | Couple section (arch-cropped, 5:7)  | 1000×1400           |
 | `public/images/groom.jpg`      | Couple section (arch-cropped, 5:7)  | 1000×1400           |
 | `public/music/nasheed.mp3`     | Music toggle                        | < 3 MB, loops well  |
@@ -39,7 +38,7 @@ hardcodes content. Fields worth double-checking are marked `// VERIFY:`.
 - `brideHome` — the bride's family address
 - `wedding` — date (drives the countdown), quote, Bismillah, invitation message
 - `venue` — name, address, Maps links, keyless embed URL
-- `events` — Nikah & Reception
+- `events` — single combined Nikkah & Reception card
 - `sharingOurJoy` — the family names list
 - `dressCode` — palettes (the hex values render as actual swatches)
 - `blessings` — duas; `payment.enabled: false` hides all gift info
@@ -47,11 +46,9 @@ hardcodes content. Fields worth double-checking are marked `// VERIFY:`.
 
 ### ⚠ Three things to confirm
 
-1. **The Maps links are name searches, not a pin.** No maps URL was supplied, so `venue.mapsUrl`
-   searches for *"Taliparamba Juma Masjid"* — Google may land guests at the wrong mosque. Open Maps,
-   find the exact building, Share → Copy link, and paste it in. Same for Babil Greens.
-2. **The reception has no date or time** — its card shows the venue only, and no calendar link.
-   Set `events[1].dateTime` and `timeLabel` when it's fixed.
+1. **The Maps link is the supplied Babil Greens pin.** `venue.mapsUrl`
+   points to the shared Google Maps URL for Babil Greens Convention Centre.
+2. **The reception is merged into the Nikkah card** — both are on the same date and at the same venue.
 3. **The Hijri date** (`24 Safar 1448`) is Umm al-Qura reckoning; local moon sighting may differ.
 
 ### Deliberately left out
@@ -106,7 +103,7 @@ src/
 │  ├─ Invitation/       Bismillah card + the hosting grandparents
 │  ├─ Couple/           Arch-cropped portraits + vertical divider
 │  ├─ Countdown/        Rolling digits on emerald
-│  ├─ Events/           Nikah & Reception glass cards
+│  ├─ Events/           Nikkah & Reception glass card
 │  ├─ Venue/            Keyless Maps embed, warmed into the palette
 │  ├─ DressCode/        Colour swatches, no photography
 │  ├─ SharingJoy/       Family names, staggered in by GSAP ScrollTrigger

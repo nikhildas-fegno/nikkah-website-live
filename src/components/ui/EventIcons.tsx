@@ -22,7 +22,7 @@ const base = {
 } as const
 
 /** A mosque arch beneath a crescent — the ceremony itself. */
-function NikahIcon(props: IconProps) {
+function NikkahIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
       <path d="M8 27V16a8 8 0 0 1 16 0v11" />
@@ -50,7 +50,7 @@ function WalimaIcon(props: IconProps) {
 }
 
 const ICONS: Record<WeddingEvent['icon'], ComponentType<IconProps>> = {
-  nikah: NikahIcon,
+  nikkah: NikkahIcon,
   walima: WalimaIcon,
 }
 

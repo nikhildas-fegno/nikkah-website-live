@@ -73,7 +73,7 @@ export function Countdown() {
     <section
       id="countdown"
       className="relative overflow-hidden bg-emerald-deep py-24 md:py-32"
-      aria-label="Countdown to the Nikah"
+      aria-label="Countdown to the Nikkah"
     >
       {/* Depth: girih weave, warm centre light, vignette */}
       <GirihPattern

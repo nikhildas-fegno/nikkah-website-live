@@ -3,14 +3,6 @@
 import { wedding, hosts } from '../../data/wedding'
 import { ArabesqueDivider, Divider, GirihPattern, Khatim } from '../ui/Ornaments'
 import { Reveal, TextReveal } from '../ui/Reveal'
-import { SmartImage } from '../ui/SmartImage'
-
-/**
- * Format negotiation, not art direction — one square photo serves every device,
- * so the only choice here is WebP (195 KB) versus the JPEG fallback (267 KB).
- * The browser takes the first source it understands.
- */
-const HOUSE_SOURCES = [{ srcSet: wedding.heroImageWebp, type: 'image/webp' }]
 
 /**
  * The Bismillah card — the site's quiet centre.
@@ -110,47 +102,6 @@ export function Invitation() {
               </p>
             </div>
           </Reveal>
-
-          {/*
-            The house the invitation is extended from — placed here rather than
-            in the Hero, where a fullscreen crop mangled it. The address it
-            belongs to is its caption, directly below.
-
-            The frame is pinned to the photo's own ratio (wedding.heroImageAspect),
-            so it renders at native aspect and is never cropped, on any device.
-            That's what lets one file serve them all — and it means a re-crop of
-            the photo needs that value updated to match.
-          */}
-          <Reveal direction="scale" delay={0.1} className="mt-10 w-full">
-            <figure className="relative mx-auto max-w-2xl">
-              {/* Offset gold rule — the frame lifts off the photo */}
-              <div
-                aria-hidden="true"
-              />
-
-              <div className="relative overflow-hidden">
-                <SmartImage
-                  src={wedding.heroImage}
-                  sources={HOUSE_SOURCES}
-                  alt={wedding.heroImageAlt}
-                  className="w-full"
-                  style={{ aspectRatio: wedding.heroImageAspect }}
-                />
-                {/* Barely-there warm grade, so the photo belongs to the palette
-                    without being dimmed the way the Hero had to dim it */}
-                <div
-                  className="pointer-events-none absolute inset-0 bg-gold/[0.05] mix-blend-overlay"
-                  aria-hidden="true"
-                />
-                <div
-                  className="pointer-events-none absolute inset-0 border border-gold/25"
-                  aria-hidden="true"
-                />
-              </div>
-
-            </figure>
-          </Reveal>
-
           {/* Signature */}
           {/* <Reveal direction="fade" delay={0.35}>
             <div className="flex flex-col items-center gap-3">
