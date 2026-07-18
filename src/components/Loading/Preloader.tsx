@@ -125,6 +125,10 @@ export function Preloader({ onMusicIntent, onOpenStart, onOpen }: PreloaderProps
       onMusicIntent()
       handleOpen()
     }
+    const onClick = () => {
+      logMusic('preloader click unlock')
+      onMusicIntent()
+    }
     const onWheel = (e: WheelEvent) => {
       if (e.deltaY > 0) {
         logMusic('preloader wheel open', { deltaY: e.deltaY })
@@ -145,6 +149,10 @@ export function Preloader({ onMusicIntent, onOpenStart, onOpen }: PreloaderProps
       logMusic('preloader touchstart', { touchStart })
       onMusicIntent()
     }
+    const onTouchEnd = () => {
+      logMusic('preloader touchend unlock')
+      onMusicIntent()
+    }
     const onTouchMove = (e: TouchEvent) => {
       const distance = touchStart - (e.touches[0]?.clientY ?? 0)
       if (distance > 24) {
@@ -154,16 +162,20 @@ export function Preloader({ onMusicIntent, onOpenStart, onOpen }: PreloaderProps
     }
 
     window.addEventListener('pointerdown', onPointerDown, { passive: true })
+    window.addEventListener('click', onClick, { passive: true })
     window.addEventListener('wheel', onWheel, { passive: true })
     window.addEventListener('keydown', onKey)
     window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchend', onTouchEnd, { passive: true })
     window.addEventListener('touchmove', onTouchMove, { passive: true })
 
     return () => {
       window.removeEventListener('pointerdown', onPointerDown)
+      window.removeEventListener('click', onClick)
       window.removeEventListener('wheel', onWheel)
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchend', onTouchEnd)
       window.removeEventListener('touchmove', onTouchMove)
     }
   }, [handleOpen, onMusicIntent, prefersReduced])

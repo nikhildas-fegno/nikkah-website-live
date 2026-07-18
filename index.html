@@ -104,14 +104,24 @@
 
         const cleanup = () => {
           window.removeEventListener('touchstart', playFromMobileGesture, true)
+          window.removeEventListener('touchend', playFromMobileGesture, true)
           window.removeEventListener('pointerdown', playFromMobileGesture, true)
+          window.removeEventListener('click', playFromMobileGesture, true)
         }
 
         window.addEventListener('touchstart', playFromMobileGesture, {
           capture: true,
           passive: true,
         })
+        window.addEventListener('touchend', playFromMobileGesture, {
+          capture: true,
+          passive: true,
+        })
         window.addEventListener('pointerdown', playFromMobileGesture, {
+          capture: true,
+          passive: true,
+        })
+        window.addEventListener('click', playFromMobileGesture, {
           capture: true,
           passive: true,
         })

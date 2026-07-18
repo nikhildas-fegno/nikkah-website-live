@@ -35,7 +35,7 @@ export default function App() {
       autoplayAfterOpen: music.autoplayAfterOpen,
       isPlaying,
     })
-    if (music.autoplayAfterOpen && !isPlaying) {
+    if (music.autoplayAfterOpen) {
       void play()
     }
   }, [isPlaying, play])
