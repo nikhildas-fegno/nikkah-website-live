@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { Preloader } from './components/Loading/Preloader'
 import { useMusic } from './hooks/useMusic'
 import { music } from './data/wedding'
@@ -19,6 +19,9 @@ export default function App() {
   /** The doors have finished and the preloader is gone: unlock scrolling. */
   const [opened, setOpened] = useState(hasHash)
 
+  // Track if the invitation has started opening (either via envelope-opening action or because it bypassed via hash)
+  const openingStartedRef = useRef(hasHash)
+
   const { isPlaying, isAvailable, toggle, play } = useMusic({
     src: music.src,
     volume: music.volume,
@@ -31,6 +34,7 @@ export default function App() {
    */
   const handleOpenStart = useCallback(() => {
     setRevealed(true)
+    openingStartedRef.current = true
     if (music.autoplayAfterOpen) play()
   }, [play])
 
@@ -50,28 +54,33 @@ export default function App() {
     }
   }, [hasHash, play])
 
-  // Fallback: If autoplay was blocked by the browser, try to start playing on the very
-  // first user interaction (click, tap, keypress) after the invitation is revealed.
+  // Fallback: If autoplay was blocked by the browser initially, try to play on any
+  // document-level user interaction (click, touchstart, keydown, wheel/scroll)
+  // as long as the invitation opening sequence has started.
   useEffect(() => {
-    if (!music.autoplayAfterOpen || isPlaying || !revealed) return
+    if (!music.autoplayAfterOpen || isPlaying) return
 
-    const handleInteraction = () => {
-      play()
-      cleanup()
+    const tryPlaying = () => {
+      if (openingStartedRef.current) {
+        play()
+        cleanup()
+      }
     }
 
     const cleanup = () => {
-      window.removeEventListener('click', handleInteraction)
-      window.removeEventListener('touchstart', handleInteraction)
-      window.removeEventListener('keydown', handleInteraction)
+      document.removeEventListener('click', tryPlaying)
+      document.removeEventListener('touchstart', tryPlaying)
+      document.removeEventListener('keydown', tryPlaying)
+      document.removeEventListener('wheel', tryPlaying)
     }
 
-    window.addEventListener('click', handleInteraction)
-    window.addEventListener('touchstart', handleInteraction)
-    window.addEventListener('keydown', handleInteraction)
+    document.addEventListener('click', tryPlaying)
+    document.addEventListener('touchstart', tryPlaying, { passive: true })
+    document.addEventListener('keydown', tryPlaying)
+    document.addEventListener('wheel', tryPlaying, { passive: true })
 
     return cleanup
-  }, [revealed, isPlaying, play])
+  }, [isPlaying, play])
 
   return (
     <>
