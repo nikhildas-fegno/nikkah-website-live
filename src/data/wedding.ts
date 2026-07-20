@@ -172,16 +172,34 @@ export const venue = {
 
 export const events: WeddingEvent[] = [
   {
-    id: 'nikkah-reception',
-    name: 'Nikkah & Reception',
+    id: 'nikkah',
+    name: 'Nikkah',
     arabicName: 'نكاح',
     dateTime: '2026-08-07T17:00:00+05:30',
-    timeLabel: '5:00 PM onwards',
+    timeLabel: '5:00 PM',
     venue: venue.name,
     address: venue.address,
     description:
-      'The solemnisation of our marriage, followed by dua and reception at the same venue. We would be honoured to have you share in the blessings and joy of the day.',
+      'The solemnisation of our marriage, followed by dua. We would be honoured to have you witness our nikkah and share in the blessings of the day.',
     icon: 'nikkah',
+    mapsUrl: venue.mapsUrl,
+  },
+  {
+    id: 'reception',
+    name: 'Reception',
+    arabicName: 'وليمة',
+    // Reception follows the nikkah. dateTime drives the sort/countdown; the
+    // label is the one guests read.
+    dateTime: '2026-08-07T17:30:00+05:30',
+    timeLabel: '5:30 PM — 8:30 PM',
+    // Both events share the `venue` const (Babil Greens). If the nikkah is at a
+    // different place — a masjid, say — give THAT event its own venue/address/
+    // mapsUrl literals and leave this one pointing at `venue.*`.
+    venue: venue.name,
+    address: venue.address,
+    description:
+      'An evening of food, warmth and gratitude in the company of family and friends. We look forward to welcoming you.',
+    icon: 'walima',
     mapsUrl: venue.mapsUrl,
   },
 ]
