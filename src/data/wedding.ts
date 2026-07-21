@@ -185,8 +185,8 @@ export const events: WeddingEvent[] = [
     mapsUrl: venue.mapsUrl,
   },
   {
-    id: 'reception',
-    name: 'Reception',
+    id: 'walima',
+    name: 'Walima',
     arabicName: 'وليمة',
     // Reception follows the nikkah. dateTime drives the sort/countdown; the
     // label is the one guests read.
@@ -227,16 +227,17 @@ export const sharingOurJoy = {
 
 export const contact = {
   // VERIFY: the floating WhatsApp button opens a chat to this number. International
-  // format, digits only. Confirm it is actually on WhatsApp.
-  whatsapp: '919526222228',
+  // format, digits only. Confirm it is actually on WhatsApp — updated to match
+  // the contact number below; revert if WhatsApp is on a different SIM.
+  whatsapp: '919495902453',
   /** Shown in the footer and dialable on mobile. */
-  phones: ['+91 9526 222 228', '+91 9747 222 228'],
+  phones: ['+91 94959 02453','+91 97472 22228'],
   email: 'nishadmo7@gmail.com',
 } as const
 
 export const socials: SocialLink[] = [
   { label: 'Email us', href: 'mailto:nishadmo7@gmail.com', icon: 'mail' },
-  { label: 'Call us', href: 'tel:+919526222228', icon: 'phone' },
+  { label: 'Call us', href: 'tel:+919495902453', icon: 'phone' },
 ]
 
 /* -------------------------------------------------------------------------- */

@@ -1,11 +1,11 @@
-import { Clock, MapPin, CalendarDays } from 'lucide-react'
+import { ArrowUpRight, Clock, MapPin, CalendarDays } from 'lucide-react'
 import { events } from '../../data/wedding'
 import { formatDate, formatDay } from '../../utils/date'
 import { cn } from '../../utils/cn'
 import { GlassCard } from '../ui/GlassCard'
 import { ButtonLink } from '../ui/Button'
 import { SectionHeading } from '../ui/SectionHeading'
-import { RevealGroup, RevealItem } from '../ui/Reveal'
+import { Reveal, RevealGroup, RevealItem } from '../ui/Reveal'
 import { Divider, LatticePattern, StarEight } from '../ui/Ornaments'
 import { EventIcon } from '../ui/EventIcons'
 // VenueMap is commented out below — restore this import if you bring it back.
@@ -29,6 +29,15 @@ export function Events() {
    * the wording, the grid and the heading all correct themselves.
    */
   const many = events.length > 1
+
+  /**
+   * When every event points at the same map, one shared "Get Directions" sits
+   * below the grid instead of an identical button on each card. `null` when
+   * they differ, which flips the buttons back to per-card.
+   */
+  const firstMaps = events[0]?.mapsUrl
+  const sharedMaps =
+    firstMaps && events.every((e) => e.mapsUrl === firstMaps) ? firstMaps : null
 
   return (
     <section id="events" className="section-y relative overflow-hidden" aria-label="Events">
@@ -133,68 +142,93 @@ export function Events() {
                         <dd className="text-[0.8rem] font-light text-ink">{event.timeLabel}</dd>
                       </div>
                     )}
-
-                    {/*
-                      The venue is promoted out of the plain rows above: it's
-                      the one detail a guest has to act on — the date they'll
-                      remember, the address they must navigate to. Tinted
-                      panel, gold rule, and the name in display emerald so it
-                      carries at a glance.
-                    */}
-                    <div className="grid grid-cols-[auto_1fr] items-start gap-x-3.5 rounded-[1px] border border-gold/30 bg-gold/[0.06] px-4 py-3.5">
-                      <dt className="mt-1">
-                        <MapPin
-                          className="h-4 w-4 text-gold-deep"
-                          strokeWidth={1.5}
-                          aria-hidden="true"
-                        />
-                        <span className="sr-only">Venue</span>
-                      </dt>
-                      <dd>
-                        <span className="display block text-[1.2rem] leading-snug text-emerald md:text-[1.35rem]">
-                          {event.venue}
-                        </span>
-                        <span className="mt-1 block text-[0.72rem] leading-relaxed font-light text-muted">
-                          {event.address}
-                        </span>
-                      </dd>
-                    </div>
                   </dl>
 
-                  <p className="mb-8 text-[0.78rem] leading-loose font-light text-pretty text-muted">
+                  {/*
+                    The venue is the one detail a guest has to ACT on, so the
+                    whole panel is a link to the map — not just the button below.
+                    It lives outside the <dl> because an <a> can't be a direct
+                    child of a definition list.
+
+                    On hover the tint warms and the arrow slides, so it reads as
+                    tappable rather than as a static callout. The button below is
+                    kept as well: some people look for a labelled action, others
+                    tap the thing that looks like a place.
+                  */}
+                  <a
+                    href={event.mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Get directions to ${event.venue}, ${event.address}`}
+                    className="group/venue mb-7 grid grid-cols-[auto_1fr_auto] items-center gap-x-3.5 rounded-[1px] border border-gold/30 bg-gold/[0.06] px-4 py-3.5 transition-colors duration-300 hover:border-gold/60 hover:bg-gold/[0.11] focus-visible:outline-gold"
+                  >
+                    <MapPin
+                      className="h-4 w-4 self-start text-gold-deep"
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
+                    <span>
+                      <span className="display block text-[1.2rem] leading-snug text-emerald md:text-[1.35rem]">
+                        {event.venue}
+                      </span>
+                      <span className="mt-1 block text-[0.72rem] leading-relaxed font-light text-muted">
+                        {event.address}
+                      </span>
+                    </span>
+                    {/* Affordance: an arrow that nudges on hover */}
+                    <ArrowUpRight
+                      className="h-4 w-4 self-start text-gold-deep/70 transition-transform duration-300 group-hover/venue:translate-x-0.5 group-hover/venue:-translate-y-0.5"
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
+                  </a>
+
+                  <p className="text-[0.78rem] leading-loose font-light text-pretty text-muted">
                     {event.description}
                   </p>
 
-                  {/* Actions pinned to the card foot so both cards align */}
-                  <div className="mt-auto flex flex-wrap justify-center gap-3">
-                    {/* No date, no calendar link — it would create an event at
-                        an arbitrary time in the guest's calendar. */}
-
-                    {/* Gold, not glass — this is the action the highlighted
-                        venue above is pointing at, so it shouldn't read as a
-                        secondary control. */}
-                    <ButtonLink
-                      href={event.mapsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      variant="gold"
-                      size="sm"
-                      icon={<MapPin className="h-3.5 w-3.5" strokeWidth={1.25} />}
-                      iconPosition="left"
-                    >
-                      Get Directions
-                    </ButtonLink>
-                  </div>
+                  {/* Per-card directions ONLY when the events are at different
+                      places. When they share a venue (the common case), the
+                      single button below the grid handles it, so two identical
+                      "Get Directions" don't sit side by side. */}
+                  {!sharedMaps && (
+                    <div className="mt-auto flex justify-center pt-8">
+                      <ButtonLink
+                        href={event.mapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        variant="gold"
+                        size="sm"
+                        icon={<MapPin className="h-3.5 w-3.5" strokeWidth={1.25} />}
+                        iconPosition="left"
+                      >
+                        Get Directions
+                      </ButtonLink>
+                    </div>
+                  )}
                 </div>
               </GlassCard>
             </RevealItem>
           ))}
         </RevealGroup>
 
-        {/* The map, grounding the cards above it */}
-        {/* <div className="mt-14 md:mt-20">
-          <VenueMap />
-        </div> */}
+        {/* One shared directions button — both events are at the same venue,
+            so a single call to action is clearer than one per card. */}
+        {sharedMaps && (
+          <Reveal direction="up" className="mt-12 flex justify-center md:mt-16">
+            <ButtonLink
+              href={sharedMaps}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="gold"
+              size="md"
+              icon={<MapPin className="h-4 w-4" strokeWidth={1.25} />}
+              iconPosition="left"
+            >
+              Get Directions
+            </ButtonLink>
+          </Reveal>
+        )}
       </div>
     </section>
   )
